@@ -77,7 +77,7 @@ classdef UR < handle
                     error('Backlog must be an integer.');   % Raise error if backlog is not a number
                 end
 
-                addpath('C:\Users\Research\Google Drive\GitHub\UR')  % Add path with modules
+                % addpath('C:\Users\Research\Google Drive\GitHub\UR')  % Add path with modules
 
                 obj.SERVER = URMod.initServer(obj.HOST,obj.PORT,obj.BACKLOG); % Create server socket on computer
                 fprintf('Server created.\n')            % Indicate server started
