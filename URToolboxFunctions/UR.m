@@ -90,7 +90,7 @@ classdef UR < handle
 	    
             fprintf('Begin onboard controller, then press ENTER.') % Press start on manipulators.
             obj.CLIENT = URMod.cnctClient(obj.SERVER);   % Wait for first onboard controller to connect as client
-            obj.CLIENTADDR = char(obj.CLIENT{2}{1});
+            % obj.CLIENTADDR = char(obj.CLIENT{2}{1});
             obj.CLIENT = obj.CLIENT{1};
             obj.STATE = 'OPEN';             % Set STATE property to indicate connections
             input('');                      % Wait for key press to indicate controllers started
