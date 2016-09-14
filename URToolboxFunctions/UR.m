@@ -19,7 +19,7 @@ classdef UR < handle
         PORT        % Server port to listen on --> should be 30002
         BACKLOG     % Number of connections to listen to --> should be 2
         CLIENT      % Client (UR manipulators)
-        CLIENTADDR  % Client address
+        % CLIENTADDR  % Client address
         SERVER      % Server socket object --> created during initialization
         MSG         % Message to be sent to UR robot --> input by user
         STATE       % Socket state --> can be OPEN or CLOSE
@@ -90,8 +90,6 @@ classdef UR < handle
 	    
             fprintf('Begin onboard controller, then press ENTER.') % Press start on manipulators.
             obj.CLIENT = URMod.cnctClient(obj.SERVER);   % Wait for first onboard controller to connect as client
-            % obj.CLIENTADDR = char(obj.CLIENT{2}{1});
-            obj.CLIENT = obj.CLIENT{1};
             obj.STATE = 'OPEN';             % Set STATE property to indicate connections
             input('');                      % Wait for key press to indicate controllers started
             fprintf('Connections established.\n');  % Indicate clients connected
