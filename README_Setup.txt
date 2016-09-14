@@ -234,4 +234,8 @@ To import Python modules in MATLAB: moduleHandle = py.importlib.import_module('m
 
 Use network switch to connect both manipulators to the same computer
 
-Second set of custom control classes
+UR class allows for multiple objects of that type to be created, provided only one server is initialized
+For the 1st connection, give no initial input variables --> user will then be prompted for specs to create server
+For subsequent connections, give handle of first UR object as input variable --> MATLAB will migrate server to new object
+
+After create, simply use the different handles to specify which manipulator to query/ocontrol
