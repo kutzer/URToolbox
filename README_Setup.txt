@@ -194,6 +194,7 @@ Found that best results were acheived with:
 
 ********************************MATLAB INTERFACING*******************************
 
+*** MUST USE PYTHON VERSION 3.4 --> MATLAB IS NOT COMPATIBLE WITH 3.5 ***
 Created custom MATLAB class and Python module to enable control in MATLAB only
  - Do not use any print() statements in Python, MATLAB does not like them
  - In MATLAB class, make sure to set as a handle type
