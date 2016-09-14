@@ -138,7 +138,7 @@ def getTTrans(robot):
 # Get general tool data {returns as dictionary, not list}
 def getTInfo(robot):
     global tInfo
-    tInfo = robot.secmon._dict["ToolInfo"]
+    tInfo = robot.secmon._dict["ToolData"]
     return tInfo
 
 # Get current analog inputs
