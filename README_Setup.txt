@@ -238,4 +238,41 @@ UR class allows for multiple objects of that type to be created, provided only o
 For the 1st connection, give no initial input variables --> user will then be prompted for specs to create server
 For subsequent connections, give handle of first UR object as input variable --> MATLAB will migrate server to new object
 
-After create, simply use the different handles to specify which manipulator to query/ocontrol
+After create, simply use the different handles to specify which manipulator to query/control
+
+*****************************END DUAL ROBOT CONTROL******************************************
+
+***********************************UR SETUP AND TEACH PENDANT*****************************
+
+Each UR manipulator must be correctly configured in order to function with the MATLAB class.
+
+From main menu:
+-> Setup Robot
+	-> Setup Network
+		Use static address:
+		 - IP address: 10.1.1.2 (UR10) / 10.1.1.4 (UR5)
+		 - Subnet mask: 255.255.255.0
+		 - Default gateway: 10.1.1.1
+		 - No DNS parameters
+		 
+To move home:
+-> Run program
+	-> Select "Move" tab
+		- Home -> AUTO
+
+To load controller:
+-> Program robot
+	-> New program
+	-> Click on empty spot in tree
+	-> Go to Structure tab
+		-> Go to Advanced
+			-> Script Code
+	-> Back out to Command tab
+	-> Change Line to File
+	-> Select Edit
+	-> Click Select File
+	-> Should be PIDControllerWithGains
+	-> Adjust gains if desired
+	-> Save
+	-> Exit
+-> Click Play button to begin program when desired (after initalizing MATLAB)
