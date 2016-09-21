@@ -163,7 +163,8 @@ end
 set(wb,'Visible','off');
 
 %% Migrate toolbox support folder
-
+% TODO - search for python directory and prompt user to find the correct
+% one...
 pythonRoot = fullfile('C:\Python34\Lib');
 toolboxContent = 'URToolboxSupport';
 if ~isdir(toolboxContent)
