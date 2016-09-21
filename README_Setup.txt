@@ -135,29 +135,6 @@ Formatting:
 
 *************************************END SOCKET DETAILS*******************************************
 
-******************************SUCCESSFUL ONBOARD CONTROL [12 JUL 16]*********************************
-
-Original code structure sourced from BIGSSURServer.ur by Ryan Murphy (JHU)
-	*** NOTE: THIS IS NOT A PD CONTROLLER
-		-> IT ONLY HAS PROPORTIONAL CONTROL WITH A HARD THRESHOLD
-
-For full modified file, see C:\Users\Research\Documents\threadController.script
-Overview of changes:
- - Remove def BISSURServer(): and corresponding end
- - Change ADDRESS and HOST pointers to UR5/UR10 IP address and 30002 respectively
- - Remove spatial velocity thread
- - Remove joint velocity thread
- - Keep initialized variables and main thread
-	-> Change pos_dist[i] = qcurr[i] - pd_qdes[i] to pos_dist[i] = pd_qdes[i] - qcurr[i]
-	-> Swap elif and if clauses to allow for stopping at desired pose
-	-> Adjust thresholds and multipliers as desired
-	-> Change speedj to speedj(pos_vel, 1.0,0.1)
- - Keep only mode 6 of main loop
- - Change val read command to val = socket_read_ascii_float(6) instead of (7)
- - Creat valOld to send old position if no new position is received on a given cycle
-
-********************************END BASIC CONTROL********************************
-
 ********************************PID CONTROLLER******************************
 
 Use modified controller in C:\Users\Research\Document\threadController.script as base
@@ -168,37 +145,32 @@ Incorporates more sophisticated PID control law according to following law:
                             }
 
 Needs to receive twelve values instead of just six: val = [[joint_pos][joint_vel]]
-	-> val = socket_read_ascii_float(12)
-	-> val = [12,joint1,joint2,joint3,joint4,joint5,joint6,jointvel1,jointvel2,jointvel3,jointvel4,jointvel5,jointvel6]
+	-> val = socket_read_ascii_float(15)
+	-> val = [15,joint1,joint2,joint3,joint4,joint5,joint6,jointvel1,jointvel2,jointvel3,jointvel4,jointvel5,jointvel6, Kp, Ki, Ka]
 
-PID Controller succesfully implemented, still working on tuning gains.  For now:
+PID Controller succesfully implemented, still working on tuning gains.  For now use default values:
 	-> Kp = 1.0
 	-> Ki = 0.0 (increase slowly as tests, such as Ki += 0.05)
-	-> Ka = 1.0 
+	-> Ka = 0.0 
 
-UPDATE
-Found that best results were acheived with:
-	-> Kp = 1.0
-	-> Ki = 0.0
-	-> Ka = 0.0
  - This is just proportional control, needs to be checked with a wide variety of movements to be sure
 
 *********************************END PID CONTROLLER*****************************
 
 ********************************MATLAB INTERFACING*******************************
 
-*** MUST USE PYTHON VERSION 3.4 --> MATLAB IS NOT COMPATIBLE WITH 3.5 ***
+*** MUST USE PYTHON VERSION 3.4.4 --> MATLAB IS NOT COMPATIBLE WITH 3.5 ***
 Created custom MATLAB class and Python module to enable control in MATLAB only
  - Do not use any print() statements in Python, MATLAB does not like them
  - In MATLAB class, make sure to set as a handle type
  - Set modules as global variables so that all functions in the class can call them
- - Put Python files in MATLAB directory, or use addpath() function at initialization
+ - Put Python files in Python directory, MATLAB will not look in MATLAB folders
  - Make sure set and get functions are included for properties that change
  - Allows for double connection:
 	-> Computer serves as server to feed desired waypoints to onboard UR client socket
 	-> Computer also opens URX connection to get immediate telemetry back
- - Be sure to explore URXNAME.secmon._dict -> contains all possible data from UR
-	-> Not all was made easily accessible via higher level functions, ie:
+ - Be sure to explore URXNAME.secmon._dict IN PYTHON SHELL -> contains all possible data from UR
+	-> Not everything was made easily accessible via higher level MATLAB functions, ie:
 		 - URXNAME.getj() will return joint data
 		 - No corresponding function for joint velocities -> use dictionary with specific keys to extract
  - When sending numbers/variables from MATLAB to a Python function, make sure they are the right type
@@ -206,17 +178,11 @@ Created custom MATLAB class and Python module to enable control in MATLAB only
 	-> Python lists, tuples, dictionaries, and other types not normally found in MATLAB must be extracted
 		 - Use for loops to creat cell arrays, and then pull values from that into MATLAB arrays/vectors
 
-On laptop setup, see following files (easier if they are in the same directory as trajectory scripts):
- -> C:\Users\Research\Documents\URSocketMatlab.py
- -> C:\Users\Research\Documents\URMatlabClass.m
-
 Default values for calling from MATLAB class:
  - Server IP Address: 10.1.1.5
  - Server Port: 30002
  - Backlog: 1 (refers to number of connections server will accept)
  - URX IP Address: for UR5:: 10.1.1.4; for UR10:: 10.1.1.2
-
-Currently configured to create a plot of each joint's position and velocity against the commanded values
 
 To import Python modules in MATLAB: moduleHandle = py.importlib.import_module('moduleName')
 	-> Do not include the .py extension when importing, MATLAB will not recognize it
@@ -270,7 +236,9 @@ To load controller:
 	-> Exit
 -> Click Play button to begin program when desired (after initalizing MATLAB)
 
-LEGACY DOCUMENTATION
+- Use button on back of teach pendant to manually move arm into position
+
+********************************************LEGACY DOCUMENTATION*****************************************************
 
 Easy UR Socket Class: written by ENS Strotz to simplify server communications with UR5/UR10
 	*** MAKE SURE URSocketClass.py IS IN THE CORRECT FOLDER TO BE IMPORTED
@@ -280,3 +248,30 @@ Easy UR Socket Class: written by ENS Strotz to simplify server communications wi
 	>>> s.cnct(HOST,PORT)
 	>>> s.sendmsg(msg)
 	>>> s.close()
+
+On laptop setup, see following files (easier if they are in the same directory as trajectory scripts):
+ -> C:\Users\Research\Documents\URSocketMatlab.py
+ -> C:\Users\Research\Documents\URMatlabClass.m
+
+******************************SUCCESSFUL ONBOARD CONTROL [12 JUL 16]*********************************
+
+Original code structure sourced from BIGSSURServer.ur by Ryan Murphy (JHU)
+	*** NOTE: THIS IS NOT A PD CONTROLLER
+		-> IT ONLY HAS PROPORTIONAL CONTROL WITH A HARD THRESHOLD
+
+For full modified file, see C:\Users\Research\Documents\threadController.script
+Overview of changes:
+ - Remove def BISSURServer(): and corresponding end
+ - Change ADDRESS and HOST pointers to UR5/UR10 IP address and 30002 respectively
+ - Remove spatial velocity thread
+ - Remove joint velocity thread
+ - Keep initialized variables and main thread
+	-> Change pos_dist[i] = qcurr[i] - pd_qdes[i] to pos_dist[i] = pd_qdes[i] - qcurr[i]
+	-> Swap elif and if clauses to allow for stopping at desired pose
+	-> Adjust thresholds and multipliers as desired
+	-> Change speedj to speedj(pos_vel, 1.0,0.1)
+ - Keep only mode 6 of main loop
+ - Change val read command to val = socket_read_ascii_float(6) instead of (7)
+ - Creat valOld to send old position if no new position is received on a given cycle
+
+********************************END BASIC CONTROL********************************
