@@ -6,14 +6,16 @@ ENS Kevin Strotz
 
 User-Machine Interface
 
-Download Python v. 3.5.2
-https://www.python.org/downloads/release/python-352/
- - Windows x86 executable installer
- - Store in default location
+Download Python v. 3.4.4
+https://www.python.org/downloads/release/python-344/
+ - Windows x86-64 executable installer (for 64 bit OS)
+ - Store in default location (should be C:\Python34)
 
 In command line, use pip utility to download math3d, urx, and numpy modules
- - Directory: C:\Users\strotz\AppData\Local\Programs\Python\Python35-32\Scripts
- - Enter commands:
+ - Directory: C:\Python34\Scripts
+ 	- To get there, run cd C:\Python34\Scripts
+ 	
+ - Enter commands IN THIS ORDER:
 	pip install math3d
 	pip install numpy
 	pip install urx
@@ -22,7 +24,7 @@ In command line, use pip utility to download math3d, urx, and numpy modules
 
 File Transfer Protocol Interface
 
-Download WinSCP v. 5.7.7
+Download WinSCP v. 5.7.7 or latest version
 https://winscp.net/download/winscp577setup.exe
  - Windows x86 executable installer
  - Store in default location
@@ -43,16 +45,16 @@ Default Gateway: 10.1.1.1
 Use Network and Sharing Center to configure IPv4 for Local Area Network
 
 FTP:
- - Username: root
- - Password: easybot
+ - Username: root (UR default username)
+ - Password: easybot (UR default password)
  - Host: IP address of desired robot
  - Port: 22
 Create programs in Notepad, saved as exampleName.script
 Connect FTP, and upload from computer into /programs directory of UR
 Then use teach pendant to place script in a program and run
- - Make sure it is nested in program, not outside
- - Still some issues when trying to run URP files
- - Instead, load script and then save natively to allow UR to compile .urp file
+ - Make sure it is nested in \program, not outside in \root directory
+	- Still some issues when trying to run URP files
+ 	- Instead, load script and then save natively to allow UR to compile .urp file
 
 TCP/IP
  - Host: IP address of desired robot
@@ -62,7 +64,7 @@ TCP/IP
 
 Other Useful Modules
  - time: sleep, wait, other clock functions
- - socket: for manual communication in case urx modules fails
+ - socket: for *manual communication in case urx modules fails*
 	Basic steps for client (send one line commands to be instantly executed):
 	>>> s = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
 	>>> s.connect((HOST,PORT))
@@ -82,15 +84,6 @@ Other Useful Modules
  - sys: system properties
  - math: basic trig and algebra functionts
 	*** NEED NUMPY AND MATH3D FOR MATRICES AND TRAJECTORIES ***
-
-Easy UR Socket Class: written by ENS Strotz to simplify server communications with UR5/UR10
-	*** MAKE SURE URSocketClass.py IS IN THE CORRECT FOLDER TO BE IMPORTED
-		-> On the laptop setup, put it in C:\Users\Research\AppData\Local\Programs\Python\Python35-35\Lib
-	>>> import URSocketClass
-	>>> s = URSocketClass.URSocket()
-	>>> s.cnct(HOST,PORT)
-	>>> s.sendmsg(msg)
-	>>> s.close()
 
 URX Module: establishes socket connection with UR5/UR10 as a client, vice URSocketClass working as server
 	>>> import urx
@@ -276,3 +269,14 @@ To load controller:
 	-> Save
 	-> Exit
 -> Click Play button to begin program when desired (after initalizing MATLAB)
+
+LEGACY DOCUMENTATION
+
+Easy UR Socket Class: written by ENS Strotz to simplify server communications with UR5/UR10
+	*** MAKE SURE URSocketClass.py IS IN THE CORRECT FOLDER TO BE IMPORTED
+		-> On the laptop setup, put it in C:\Users\Research\AppData\Local\Programs\Python\Python35-35\Lib
+	>>> import URSocketClass
+	>>> s = URSocketClass.URSocket()
+	>>> s.cnct(HOST,PORT)
+	>>> s.sendmsg(msg)
+	>>> s.close()
