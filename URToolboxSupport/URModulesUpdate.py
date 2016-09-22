@@ -12,6 +12,6 @@
 
 def updateURModules():
     import pip
-    pip.main(["install","math3d","--upgrade"])
-    pip.main(["install","numpy","--upgrade"])
-    pip.main(["install","urx","--upgrade"])
+    mathChk = pip.main(["install","math3d","--upgrade","quiet"])
+    numChk = pip.main(["install","numpy","--upgrade","quiet"])
+    urxChk = pip.main(["install","urx","--upgrade","quiet"])
