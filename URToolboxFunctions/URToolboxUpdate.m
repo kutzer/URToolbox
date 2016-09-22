@@ -9,6 +9,12 @@ function URToolboxUpdate
 % Install UR Toolbox
 ToolboxUpdate('UR');
 
+updateModule = py.importlib.import_module('URModulesUpdate');
+
+fprintf('Updating Python modules...');
+updateModule.updateURModules();
+fprintf('[Complete]\n');
+
 end
 
 function ToolboxUpdate(toolboxName)
