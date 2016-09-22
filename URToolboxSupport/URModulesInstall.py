@@ -13,7 +13,7 @@
 
 def installURModules():
     import pip
-    pip.main(["install","math3d"])
-    pip.main(["install","numpy"])
-    pip.main(["install","urx"])
+    mathChk = pip.main(["install","math3d","--quiet"])
+    numChk = pip.main(["install","numpy","--quiet"])
+    urxChk = pip.main(["install","urx","--quiet"])
 
