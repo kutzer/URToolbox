@@ -248,6 +248,11 @@ fprintf('Rehashing Toolbox Cache...');
 rehash TOOLBOXCACHE
 fprintf('[Complete]\n');
 
+installModule = py.importlib.import_module('URModulesInstall');
+fprintf('Installing necessary Python modules...');
+installModule.installURModules();
+fprintf('[Complete\n');
+
 end
 
 function ToolboxUpdate(toolboxName)
