@@ -26,7 +26,7 @@ tmpFolder = sprintf('%sToolbox',toolboxName);
 pname = fullfile(tempdir,tmpFolder);
 
 %% Download and unzip toolbox (GitHub)
-url = sprintf('https://github.com/kstrotz/%sToolbox/archive/master.zip',toolboxName);
+url = sprintf('https://github.com/kutzer/%sToolbox/archive/master.zip',toolboxName);
 try
     fnames = unzip(url,pname);
     fprintf('SUCCESS\n');
