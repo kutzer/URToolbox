@@ -15,11 +15,11 @@ Consider renaming
 classdef UR < handle
     % Define properties that will be set as part of the object
     properties
+    	MODULE	    % Python module
         HOST        % Server IP address (on computer) --> generally set to 10.1.1.5
         PORT        % Server port to listen on --> should be 30002
         BACKLOG     % Number of connections to listen to --> should be 2
         CLIENT      % Client (UR manipulators)
-        % CLIENTADDR  % Client address
         SERVER      % Server socket object --> created during initialization
         MSG         % Message to be sent to UR robot --> input by user
         STATE       % Socket state --> can be OPEN or CLOSE
@@ -49,10 +49,8 @@ classdef UR < handle
         % port = IP port on UR manipulators [30002]
         % backlog = number of connections [2]
         function obj = UR(prevServer)
-            global URMod;                           % Global variable for custom Python module
             % IMPORT PYTHON MODULES: DO NOT INCLUDE .py
-            addpath('C:\Program Files\MATLAB\R2016a\toolbox\ur');
-            URMod = py.importlib.import_module('URServer');
+            obj.MODULE = py.importlib.import_module('URServer');
             fprintf('Python module imported.\n');          % Indicate modules imported
             if nargin < 1
                 host = input('Enter server IP address: ','s');
@@ -79,7 +77,7 @@ classdef UR < handle
 
                 % addpath('C:\Users\Research\Google Drive\GitHub\UR')  % Add path with modules
 
-                obj.SERVER = URMod.initServer(obj.HOST,obj.PORT,obj.BACKLOG); % Create server socket on computer
+                obj.SERVER = obj.MODULE.initServer(obj.HOST,obj.PORT,obj.BACKLOG); % Create server socket on computer
                 fprintf('Server created.\n')            % Indicate server started
             else
                 obj.HOST = prevServer.HOST;
@@ -89,7 +87,7 @@ classdef UR < handle
             end    
 	    
             fprintf('Begin onboard controller, then press ENTER.') % Press start on manipulators.
-            obj.CLIENT = URMod.cnctClient(obj.SERVER);   % Wait for first onboard controller to connect as client
+            obj.CLIENT = obj.MODULE.cnctClient(obj.SERVER);   % Wait for first onboard controller to connect as client
             obj.STATE = 'OPEN';             % Set STATE property to indicate connections
             input('');                      % Wait for key press to indicate controllers started
             fprintf('Connections established.\n');  % Indicate clients connected
@@ -98,7 +96,7 @@ classdef UR < handle
             % Check if user indicates yes
             if (strcmp(urxFlag,'YES') || strcmp(urxFlag,'yes') || strcmp(urxFlag,'Y') || strcmp(urxFlag,'y'))
                 obj.URXADDR = input('Enter URX address: ','s');  % Set first URX address property
-                obj.URX = URMod.cnctURX(obj.URXADDR);                     % Create first URX connection
+                obj.URX = obj.MODULE.cnctURX(obj.URXADDR);                     % Create first URX connection
                 fprintf('URX connection established.\n');         % Indicate URX connection
             else                            % If user does not want URX connections
                 fprintf('No URX connections created.');     % Indicate no URX connections
@@ -127,8 +125,7 @@ classdef UR < handle
         end
         % Get JPOS property
         function joints = get.JPOS(obj)
-            global URMod
-            obj.JPOS = URMod.getJPos(obj.URX);
+            obj.JPOS = obj.MODULE.getJPos(obj.URX);
             joints = obj.JPOS;
         end
         % Set JVELS property
@@ -137,8 +134,7 @@ classdef UR < handle
         end
         % Get JVELS property
         function vels = get.JVELS(obj)
-            global URMod
-            obj.JVELS = URMod.getJVels(obj.URX);
+            obj.JVELS = obj.MODULE.getJVels(obj.URX);
             vels = obj.JVELS;
         end
         
@@ -147,8 +143,7 @@ classdef UR < handle
         end
         
         function torq = get.JTORQ(obj)
-            global URMod
-            obj.JTORQ = URMod.getJTorq(obj.URX);
+            obj.JTORQ = obj.MODULE.getJTorq(obj.URX);
             torq = obj.JTORQ;
         end
         
@@ -157,8 +152,7 @@ classdef UR < handle
         end
         
         function volt = get.JVOLT(obj)
-            global URMod
-            obj.JVOLT = URMod.getJVolt(obj.URX);
+            obj.JVOLT = obj.MODULE.getJVolt(obj.URX);
             volt = obj.JVOLT;
         end
         
@@ -167,8 +161,7 @@ classdef UR < handle
         end
         
         function curr = get.JCURR(obj)
-            global URMod
-            obj.JCURR = URMod.getJCurr(obj.URX);
+            obj.JCURR = obj.MODULE.getJCurr(obj.URX);
             curr = obj.JCURR;
         end
         
@@ -177,8 +170,7 @@ classdef UR < handle
         end
         
         function tpose = get.TPOS(obj)
-            global URMod
-            obj.TPOS = URMod.getTPos(obj.URX);
+            obj.TPOS = obj.MODULE.getTPos(obj.URX);
             tpose = obj.TPOS;
         end
         
@@ -187,8 +179,7 @@ classdef UR < handle
         end
         
         function tvec = get.TVEC(obj)
-            global URMod
-            obj.TVEC = URMod.getTVec(obj.URX);
+            obj.TVEC = obj.MODULE.getTVec(obj.URX);
             tvec = obj.TVEC;
         end
         
@@ -197,8 +188,7 @@ classdef UR < handle
         end
         
         function ttrans = get.TTRANS(obj)
-            global URMod
-            obj.TTRANS = URMod.getTTrans(obj.URX);
+            obj.TTRANS = obj.MODULE.getTTrans(obj.URX);
             ttrans = obj.TTRANS;
         end
         
@@ -207,8 +197,7 @@ classdef UR < handle
         end
         
         function tinfo = get.TINFO(obj)
-            global URMod
-            obj.TINFO = URMod.getTInfo(obj.URX);
+            obj.TINFO = obj.MODULE.getTInfo(obj.URX);
             tinfo = obj.TINFO;
         end
         
@@ -217,8 +206,7 @@ classdef UR < handle
         end
         
         function ain = get.AIN(obj)
-            global URMod
-            obj.AIN = URMod.getAIn(obj.URX);
+            obj.AIN = obj.MODULE.getAIn(obj.URX);
             ain = obj.AIN;
         end
         
@@ -227,8 +215,7 @@ classdef UR < handle
         end
         
         function aout = get.AOUT(obj)
-            global URMod
-            obj.AOUT = URMod.getAOut(obj.URX);
+            obj.AOUT = obj.MODULE.getAOut(obj.URX);
             aout = obj.AOUT;
         end
         
@@ -237,8 +224,7 @@ classdef UR < handle
         end
         
         function din = get.DIN(obj)
-            global URMod
-            obj.DIN = URMod.getDIn(obj.URX);
+            obj.DIN = obj.MODULE.getDIn(obj.URX);
             din = obj.DIN;
         end
         
@@ -247,8 +233,7 @@ classdef UR < handle
         end
         
         function dout = get.DOUT(obj)
-            global URMod
-            obj.DOUT = URMod.getDOut(obj.URX);
+            obj.DOUT = obj.MODULE.getDOut(obj.URX);
             dout = obj.DOUT;
         end
         
@@ -256,40 +241,37 @@ classdef UR < handle
         % Two user specified arguments:
         %  message = data string to transmit
         function obj = msg(obj,message)
-            global URMod        % Bring URMod to function workspace
             obj.MSG = message;  % Set MSG property to latest message
-            URMod.sendmsg(obj.CLIENT,obj.MSG); % Send message to CLIENT
+            obj.MODULE.sendmsg(obj.CLIENT,obj.MSG); % Send message to CLIENT
         end
         
         function obj = UpdateAll(obj)
-            global URMod
-            obj.JPOS = URMod.getJPos(obj.URX);
-            obj.JVELS = URMod.getJVels(obj.URX);
-            obj.JTORQ = URMod.getJTorq(obj.URX);
-            obj.JVOLT = URMod.getJVolt(obj.URX);
-            obj.JCURR = URMod.getJCurr(obj.URX);
-            obj.TPOS = URMod.getTPos(obj.URX);
-            obj.TVEC = URMod.getTVec(obj.URX);
-            obj.TTRANS = URMod.getTTrans(obj.URX);
-            obj.TINFO = URMod.getTInfo(obj.URX);
-            obj.AIN = URMod.getAIn(obj.URX);
-            obj.DIN = URMod.getDIn(obj.URX);
-            obj.AOUT = URMod.getAOut(obj.URX);
-            obj.DOUT = URMod.getDOut(obj.URX);
+            obj.JPOS = obj.MODULE.getJPos(obj.URX);
+            obj.JVELS = obj.MODULE.getJVels(obj.URX);
+            obj.JTORQ = obj.MODULE.getJTorq(obj.URX);
+            obj.JVOLT = obj.MODULE.getJVolt(obj.URX);
+            obj.JCURR = obj.MODULE.getJCurr(obj.URX);
+            obj.TPOS = obj.MODULE.getTPos(obj.URX);
+            obj.TVEC = obj.MODULE.getTVec(obj.URX);
+            obj.TTRANS = obj.MODULE.getTTrans(obj.URX);
+            obj.TINFO = obj.MODULE.getTInfo(obj.URX);
+            obj.AIN = obj.MODULE.getAIn(obj.URX);
+            obj.DIN = obj.MODULE.getDIn(obj.URX);
+            obj.AOUT = obj.MODULE.getAOut(obj.URX);
+            obj.DOUT = obj.MODULE.getDOut(obj.URX);
         end
         
         % Function to close ports at conclusion of operation
         % No user specified arguments
         function obj = clse(obj)
-            global URMod            % Bring URMod to function workspace
             % Make sure the user intends to close the connections
             check = input('Are you sure you want to close connections? ','s');
             % If they are sure they want to close
             if (strcmp(check,'YES') || strcmp(check,'yes') || strcmp(check,'Y') || strcmp(check,'y'))
                 obj.STATE = 'CLOSED';   % Set STATE property to closed
-                URMod.closeSocket(obj.CLIENT);   % Close first client connection
-                URMod.closeSocket(obj.SERVER);    % Close server on computer
-                URMod.closeURX(obj.URX);
+                obj.MODULE.closeSocket(obj.CLIENT);   % Close first client connection
+                obj.MODULE.closeSocket(obj.SERVER);    % Close server on computer
+                obj.MODULE.closeURX(obj.URX);
             else                        % If the user wants to keep connections
                 fprintf('Maintaining connections.'); % Keep connections open
             end
