@@ -3,8 +3,8 @@ function installURToolbox(replaceExisting)
 %   INSTALLURTOOLBOX installs UR Toolbox into the following 
 %   locations:
 %                        Source: Destination
-%     URToolboxFunctions: matlabroot\toolbox\optitrack
-%       URToolboxSupport: matlabroot\toolbox\optitrack\OptiTrackToolboxSupport 
+%     URToolboxFunctions: matlabroot\toolbox\ur
+%       URToolboxSupport: matlabroot\toolbox\ur\OptiTrackToolboxSupport 
 %
 %   INSTALLURTOOLBOX(true) installs UR Toolbox regardless of
 %   whether a copy of the UR toolbox exists in the MATLAB root.
@@ -15,6 +15,8 @@ function installURToolbox(replaceExisting)
 %   M. Kutzer 17Feb2016, USNA
 
 % Updates
+%   19Dec2016 - Added genpath to include all simulation components in the
+%   path.
 
 % TODO - Allow users to create a local version if admin rights are not
 % possible.
@@ -58,8 +60,6 @@ if isToolbox == 7
     % Replace existing or cancel installation
     switch choice
         case 'Yes'
-            % TODO - check if NatNet SDK components are running and close
-            % them prior to removing directory
             rmpath(toolboxRoot);
             [isRemoved, msg, msgID] = rmdir(toolboxRoot,'s');
             if isRemoved
@@ -80,7 +80,7 @@ if isToolbox == 7
     end
 end
 
-%% Create Scorbot Toolbox Path
+%% Create Toolbox Path
 [isDir,msg,msgID] = mkdir(toolboxRoot);
 if isDir
     fprintf('UR toolbox folder created successfully:\n\t"%s"\n',toolboxRoot);
@@ -237,10 +237,9 @@ for i = 1:n
 end
 set(wb,'Visible','off');
 
-
 %% Save toolbox path
-%addpath(genpath(toolboxRoot),'-end');
-addpath(toolboxRoot,'-end');
+addpath(genpath(toolboxRoot),'-end');
+%addpath(toolboxRoot,'-end');
 savepath;
 
 %% Rehash toolbox cache
@@ -248,8 +247,10 @@ fprintf('Rehashing Toolbox Cache...');
 rehash TOOLBOXCACHE
 fprintf('[Complete]\n');
 
-installModule = py.importlib.import_module('URModulesInstall');
+%% Install Python Modules
+% TODO - error check!
 fprintf('Installing necessary Python modules...');
+installModule = py.importlib.import_module('URModulesInstall');
 installModule.installURModules();
 fprintf('[Complete]\n');
 
