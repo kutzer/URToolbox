@@ -1,0 +1,365 @@
+#URToolboxScript
+#
+# UR Toolbox Script
+#   UR Script interface for controlling smooth trajectories of Universal 
+#   Robot manipulators. This script is intended for use with the UR class 
+#   included with the UR Toolbox for MATLAB.
+#
+# This script leverages a PID controller on the trajectory error in joint 
+# space. Three scalar gain values are defined:
+#   Kp - proportional gain applied to difference between the desired and 
+#        current joint configuration.
+#   Ki - integral gain applied to the integral of the difference between 
+#        the desired and current joint configuration.
+#           -> NOTE: Large values of Ki can lead to integrator windup 
+#                    issues.
+#   Kd - velocity tracking gain applied to the desired joint velocity.
+#
+# Basic Controller Equation:
+#   qdot = Kp(qd-q) + Ki*integral(qd-q)dt + Kd*qd_dot
+#
+# Basic Controller Equation (LaTeX):
+#   \dot{q} = K_p (q_{d}(t) - q(t)) + K_i \int_{0}^{t}(q_{d}(t) - q(t)) + K_d \dot(q_{d}(t))dt
+#
+# Valid Script Inputs:
+#   Joint Trajectory Waypoint Command (using PID controller)
+#       12 element floating point array containing:
+#           qd - 6 element desired joint position
+#           qd_dot - 6 element desired joint velocity
+#       msg = (%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f)
+#   Controller Gain Update Command
+#       3 element floating point array containing:
+#           Kp - scalar proportional gain
+#           Ki - scalar integral gain
+#           Kd - scalar derivative gain
+#       msg = (%f,%f,%f)
+#   Joint Position Command (using movej, linear movement in joint space)
+#       7 element floating point array containing:
+#           qd - 6 element desired joint position
+#       msg = (1,%f,%f,%f,%f,%f,%f)
+#   Joint Velocity Command (using speedj)
+#       7 element floating point array containing:
+#           qd_dot - 6 element desired joint velocity
+#       msg = (2,%f,%f,%f,%f,%f,%f)
+#   Joint Position Command (using movel, linear movement in task space)
+#       7 element floating point array containing:
+#           qd - 6 element desired joint position
+#       msg = (3,%f,%f,%f,%f,%f,%f)
+#
+# K. Strotz, M. Kutzer, & L. DeVries, 15Aug2016, USNA
+
+# Close any existing socket connections
+socket_close()
+
+# Establish new parameters and open connection to server
+# ADDRESS = "${HOSTNAME}"   # Auto generate hostname
+ADDRESS = "10.1.1.5"        # Hardcoded hostname
+# PORT = ${HOSTPORT}        # Auto generate portname
+PORT = 30002                # Hardcoded portname
+
+isRunning = socket_open(ADDRESS,PORT)   # Open socket
+
+###########################################################################
+# Check socket
+###########################################################################
+if isRunning:
+    textmsg("Successfully connected to server.")
+    textmsg("-> Address: ",ADDRESS)
+    textmsg("-> Port: ",PORT)
+else:
+    textmsg("Unable to connect to server.")
+    textmsg("-> Address: ",ADDRESS)
+    textmsg("-> Port: ",PORT)
+end
+
+###########################################################################
+# Initialize global variables
+###########################################################################
+# Set initial trigger conditions
+jwaypointTrigger = False    # Waypoint controller trigger
+jmotionTrigger = False      # Standard motion module function trigger
+
+# Set initial motion type flag
+jmotionFlag = 0
+
+# Initialize gains
+Kp = 1.0
+Ki = 0.0
+Kd = 0.0
+
+# Initialize joint values
+qd = get_actual_joint_positions()   # Initialize desired joint positions
+q = get_actual_joint_positions()    # Initialize current joint positions
+q_dot = [0,0,0,0,0,0]               # Initialize current joint velocities
+qd_dot = [0,0,0,0,0,0]              # Initialize desired joint velocities
+
+# Initialize integral term for controller
+Int_Delta_q = [0,0,0,0,0,0]         # Initialize numeric integral error \int_{0}^{t}(q_{d}(t) - q(t))
+
+# Initialize timer parameters
+frame = 0       # Current frame
+dt = 0.008      # Frame time (seconds)
+t = 0           # Current script time (seconds)
+New_t = 0       # Updated time (seconds)
+Old_t = 0       # Previous time (seconds)
+
+# Initialize motion parameters
+v = 1.05            # Joint velocity of leading axis (rad/s)
+a = 1.40            # Joint acceleration of leading axis (rad/s^2)
+n_min = 9           # Number of frames before function returns
+t_min = n_min*dt    # minimal time before function returns
+
+###########################################################################
+# Timing using threads and frames
+#   Time is estimated using the UR documentation assuming every thread is 
+#   executed in 0.008 seconds (125 Hz). Each thread increments the frame 
+#   and subsequently the time associated.
+# 
+#   NOTE: This is a current work-around until a URscript time parameter is 
+#         available. There is no current documentation in the URscript API 
+#         to access the UR system time. This should be replaced in the 
+#         future.
+###########################################################################
+
+###########################################################################
+# Define control thread
+###########################################################################
+thread controlThread():
+    while isRunning:
+        
+        # Update frame and time
+        frame = frame + 1
+        t = frame * dt
+
+        if jwaypointTrigger:
+            ###############################################################
+            # Define waypoint trajectory control module
+            ###############################################################
+            New_t = t       # Get current time
+            
+            q = get_actual_joint_positions()    # Current joint positions
+            q_dot = get_actual_joint_speeds()   # Current joint velocities
+
+            # Apply controller
+            i = 0   # Joint number
+            while i < 6:
+                # Update integral term
+                # - Integral error using the actual time difference
+                Int_Delta_q[i] = Int_Delta_q[i] + (qd[i]-q[i]) * (New_t - Old_t)
+                # - Integral error using the assumed 125 Hz thread rate
+                #Int_Delta_q[i] = Int_Delta_q[i] + (qd[i]-q[i]) * dt
+                # Calculate current velocity
+                q_dot[i] = Kp*(qd[i]-q[i]) + Ki*(Int_Delta_q[i]) + Kd*qd_dot[i]
+                i=i+1
+            end
+
+            if norm(q_dot) > 0.000030:
+                # Move toward waypoint
+                speedj(q_dot,a,t_min)      # Apply joint velocity
+                frame = frame + (n_min-1)  # Account for speedj execution
+            else:
+                # Stop movement
+                speedj([0,0,0,0,0,0],a,t_min)   # Zero joint velocity
+                frame = frame + (n_min-1)       # Account for speedj execution
+
+                textmsg("Static waypoint achieved: ",norm(q_dot))
+                jwaypointTrigger = False
+            end
+
+            Old_t = New_t   # Save old time
+        
+        elif jmotionTrigger:
+            ###############################################################
+            # Define standard motion module
+            ###############################################################
+            New_t = t       # Get current time
+
+            if jmotionFlag == 1:
+                # movej
+                movej(qd)   # Set joint position
+            elif jmotionFlag == 2:
+                # speedj
+                if New_t - Old_t < 0.5:
+                    speedj(qd_dot,a,t_min)      # Set joint velocity
+                    frame = frame + (n_min-1)   # Account for speedj execution
+                else:
+                    # Stop movement
+                    speedj([0,0,0,0,0,0],a,t_min)   # Zero joint velocity
+                    frame = frame + (n_min-1)       # Account for speedj execution
+                    
+                    textmsg("Joint velocity timeout.")
+                    jmotionTrigger = False
+                end
+            elif jmotionFlag == 3:
+                # movel
+                movel(qd)   # Set joint position
+            else:
+                # No motion is required
+                #   Sleep for part of frame prior to sync()
+                jmotionTrigger = False
+                sleep(dt/2)
+            end
+
+        else:
+            # No motion is required
+            #   Sleep for part of frame prior to sync()
+            sleep(dt/2)
+        
+        end # trigger
+        
+        sync()
+
+    end # running
+end # thread
+
+###########################################################################
+# Start threads
+###########################################################################
+controlHandle = run controlThread()
+
+###########################################################################
+# Check if threads are running
+###########################################################################
+if controlHandle:
+    textmsg("Control thread is running.")
+else:
+    textmsg("Unable to start control thread.")
+    isRunning = False
+end
+
+###########################################################################
+# Begin main loop
+#   Receive values from socket,
+#   Calculate velocities, and 
+#   Send velocities hand off to thread
+###########################################################################
+t = 0       # Reinitialize time 
+frame = 0   # Reinitialize frame
+iter = 0    # Main loop iteration counter
+while isRunning:
+    # Get current command
+    msg = socket_read_ascii_float(12)   # Read message
+
+    if msg[0] <= 0:
+        # No message received
+    elif msg[0] == 3:
+        ###################################################################
+        # Waypoint control gain update
+        ###################################################################
+        if msg[1] < 0:
+            textmsg("Kp must be greater than or equal to 0.")
+        elif msg[2] < 0:
+            textmsg("Ki must be greater than or equal to 0.")
+        elif msg[3] < 0:
+            textmsg("Kd must be greater than or equal to 0.")
+        else:
+            Kp = msg[1]
+            Ki = msg[2]
+            Kd = msg[3]
+            textmsg("Waypoint trajectory gain update: ",t)
+            textmsg("-> Kp: ",Kp)
+            textmsg("-> Ki: ",Ki)
+            textmsg("-> Kd: ",Kd)
+        end
+    elif msg[0] == 7:
+        ###################################################################
+        # Joint position or velocity command
+        ###################################################################
+        if msg[1] == 1:
+            ###############################################################
+            # Joint position command (using movej)
+            #   Linear move in joint space
+            ###############################################################
+            jwaypointTrigger = False    # Disable waypoint controller
+            jmotionFlag = msg[1]        # Set motion flag
+            
+            qd = [msg[2],msg[3],msg[4],msg[5],msg[6],msg[7]]    # Define desired joint position
+
+            textmsg("Joint position command (using movej): ",t) # Display message description
+            textmsg("-> movej: ", qd)                           # Display joint position
+
+            jmotionTrigger = True       # Enable standard motion module
+        elif msg[1] == 2:
+            ###############################################################
+            # Joint velocity command (using speedj)
+            ###############################################################
+            jwaypointTrigger = False    # Disable waypoint controller
+            jmotionFlag = msg[1]        # Set motion flag
+
+            qd_dot = [msg[2],msg[3],msg[4],msg[5],msg[6],msg[7]]    # Define desired joint position
+
+            textmsg("Joint velocity command (using speedj): ",t)    # Display message description
+            textmsg("-> speedj: ", qd_dot)                          # Display joint velocity
+
+            Old_t = t                   # Reinitialize prior time
+            jmotionTrigger = True       # Enable standard motion module
+        elif msg[1] == 3:
+            ###############################################################
+            # Joint position command (using movel)
+            #   Linear move in task space
+            ###############################################################
+            jwaypointTrigger = False    # Disable waypoint controller
+            jmotionFlag = msg[1]        # Set motion flag
+            
+            qd = [msg[2],msg[3],msg[4],msg[5],msg[6],msg[7]]    # Define desired joint position
+
+            textmsg("Joint position command (using movel): ", t) # Display message description
+            textmsg("-> movel: ", qd)                            # Display joint position
+
+            jmotionTrigger = True       # Enable standard motion module
+        else:
+            textmsg("Invalid message identifier: ",t)
+            textmsg("-> msg: ", msg)
+        end
+    elif msg[0] == 12:
+        ###################################################################
+        # Waypoint control command 
+        ###################################################################
+        jmotionTrigger = False    # Disable standard motion module
+        jmotionFlag = 0           # Set motion flag
+
+        qd = [msg[1],msg[2],msg[3],msg[4],msg[5],msg[6]]        # Desired joint position
+        qd_dot = [msg[7],msg[8],msg[9],msg[10],msg[11],msg[12]] # Desired joint velocity
+            
+        textmsg("Waypoint control command: ", t)
+        textmsg("-> qd: ", qd)                      # Display desired joint position
+        textmsg("-> qd_dot: ", qd_dot)              # Display desired joint velocity
+        
+        Old_t = t                   # Reinitialize prior time
+        jwaypointTrigger = True     # Enable waypoint controller
+    else:
+        textmsg("Unknown message length: ",msg[0])
+        textmsg("-> msg: ", msg)
+    end
+    
+    if t < 0:
+        isRunning = False
+        break
+    else:
+        isRunning = True
+    end
+    
+    # Display main loop iteration, frame number, and estimated time
+    iter = iter + 1
+    #textmsg(iter)
+    #textmsg(frame)
+    #textmsg("t = ",t)
+    textmsg("[Loop Iteration, Frame, Time (s)]: ", [iter, frame, t])
+    
+    sync()
+end
+
+###########################################################################
+# Terminate program
+###########################################################################
+if controlHandle:
+    textmsg("Killing control thread.")
+    join controlHandle  # Allow thre thread to finish
+    kill controlHandle  # Kill the thread (this is redundant)
+end
+
+textmsg("Closing socket.")
+socket_close()
+
+textmsg("Terminating program.")
+halt    # Terminate the program
