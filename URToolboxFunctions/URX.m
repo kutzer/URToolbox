@@ -148,7 +148,7 @@ classdef URX < matlab.mixin.SetGet % Handle
                 end
             end
             % TODO - unload the module 
-            clear classes % Suggested by MATLAB Documentation
+            %clear classes % Suggested by MATLAB Documentation
             delete(obj);
         end
         
@@ -163,7 +163,7 @@ classdef URX < matlab.mixin.SetGet % Handle
             % Robot.
             fprintf('Connecting to Universal Robot...');
             try
-                obj.URXModule = obj.MODULE.cnctURX(obj.RobotIP);
+                obj.URXModule = obj.URServer.cnctURX(obj.RobotIP);
                 obj.isConnected = true;
                 fprintf('[CONNECTED]\n');
             catch
