@@ -1,7 +1,8 @@
 classdef URsim < matlab.mixin.SetGet % Handle
-    % URsim handle class for creating a UR5 simulation/visualization
+    % URsim handle class for creating a designated UR 
+    % simulation/visualization
     %
-    %   obj = URsim creates a UR5 simulation object
+    %   obj = URsim creates a simulation object for a specific UR
     %
     % URsim Methods
     %   Initialize  - Initialize the URsim object.
@@ -79,16 +80,25 @@ classdef URsim < matlab.mixin.SetGet % Handle
     % Example:
     %
     %       % Create, initialize, and visualize
-    %       OTobj = OptiTrack;
-    %       OTobj.Initialize;
-    %       rigidBody = OTobj.RigidBody;
-    %       for i = 1:numel(rigidBody)
-    %           triad('Matrix',rigidBody.HgTransform);
-    %       end
+    %       ur5 = URsim;            % Create simulation object
+    %       ur5.Initialize('UR5');  % Designate as UR5 simulation
+    %
+    %       % Send simulation to zero configuration
+    %       ur5.Zero;               
+    %       pause(1);
+    %       % Send simulation to hold configuration
+    %       ur5.Home;
+    %       pause(1);
+    %       % Send simulation to random configuration
+    %       ur5.Joints = 2*pi*rand(1,6); 
+    %       pause(1);
     %
     % See also
     %
     %   M. Kutzer 21July2016, USNA
+    
+    % Updates
+    %   24Jan2017 - Update to help example
     
     % --------------------------------------------------------------------
     % General properties
@@ -177,11 +187,8 @@ classdef URsim < matlab.mixin.SetGet % Handle
         
         function delete(obj)
             % Delete function destructor
-            close(obj.Figure);
-            % TODO - delete handles
             delete(obj.Figure);
             delete(obj.Axes);
-            
         end
     end % end methods
     
