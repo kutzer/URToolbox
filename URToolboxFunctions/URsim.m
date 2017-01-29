@@ -11,10 +11,14 @@ classdef URsim < matlab.mixin.SetGet % Handle
     %   Zero        - Move URsim to zero joint configuration. 
     %   Undo        - Return URsim to previous joint configuration.
     %   get         - Query properties of the URsim object.
-    %   set         - Update properties of the URsim object
-    %   delete      - Uninitialize and remove the OptiTrack object.
+    %   set         - Update properties of the URsim object.
+    %   delete      - Delete the URsim object and all attributes.
     %
     % URsim Properties
+    % -Figure and Axes
+    %   Figure      - figure containing simulation axes
+    %   Axes        - axes containing simulation
+    %
     % -Universal Robot Model
     %   URmodel     - string argument defining model of Universal Robot
     %
@@ -32,12 +36,14 @@ classdef URsim < matlab.mixin.SetGet % Handle
     %   Joint6      - scalar value containing joint 6 (radians)
     %
     % -End-effector pose
-    %   Pose        - 4x4 homogeneous transform representing the
-    %                 end-effector pose relative to the world frame
+    %   Pose        - 4x4 rigid body transform defining the end-effector 
+    %                 pose relative to the world frame (linear units are
+    %                 defined in millimeters)
     %
     % -Tool pose
-    %   ToolPose    - 4x4 homogeneous transform representing the
-    %                 tool pose relative to the world frame
+    %   ToolPose    - 4x4 rigid body transform defining the tool pose
+    %                 relative to the world frame (linear units are defined
+    %                 in millimeters)
     %
     % -Frame Definitions
     %   Frame0      - Frame 0 (transformation relative to World Frame)
@@ -186,9 +192,25 @@ classdef URsim < matlab.mixin.SetGet % Handle
         end
         
         function delete(obj)
-            % Delete function destructor
-            delete(obj.Figure);
-            delete(obj.Axes);
+            % Object destructor
+            if ~ishandle(obj.Axes) || ~ishandle(obj.Figure)
+                % TODO - correct destructor
+                return
+            end
+            kids = get(obj.Axes,'Children');
+            if numel(kids) > 1
+                delete(obj.hFrame0);
+                % TODO - consider prompting user to delete axes
+            else
+                delete(obj.Axes);
+            end
+            
+            kids = get(obj.Figure,'Children');
+            if numel(kids) > 0
+                % TODO - consider prompting user to delete figure
+            else
+                delete(obj.Figure);
+            end
         end
     end % end methods
     
@@ -653,6 +675,16 @@ classdef URsim < matlab.mixin.SetGet % Handle
             set(h,'Matrix',frameT);
         end
         
+        function obj = set.Joints_Old(obj,allJoints)
+            % Set the history for undo method
+            n = 50; % Limit size of history
+            % alljoints(:,end+1) = joints;
+            if size(allJoints,2) > 50
+                allJoints(:,1) = [];
+            end
+            obj.Joints_Old = allJoints;
+        end
+            
         % GetAccess ------------------------------------------------------
         
         % URmodel - Specified type of Universal Robot Manipulator

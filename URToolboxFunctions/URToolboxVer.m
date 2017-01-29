@@ -21,9 +21,9 @@ function varargout = URToolboxVer
 %   19Dec2016 - Added simulation and support components
 
 A.Name = 'UR Toolbox';
-A.Version = '1.1.0';
+A.Version = '1.1.1';
 A.Release = '(R2016a)';
-A.Date = '19-Dec-2016';
+A.Date = '28-Jan-2017';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);
