@@ -165,7 +165,14 @@ set(wb,'Visible','off');
 %% Migrate toolbox support folder
 % TODO - search for python directory and prompt user to find the correct
 % one...
-pythonRoot = fullfile('C:\Python34\Lib');
+if exist('C:\Python34\Lib','dir') ~= 7
+    % Python 3.4 is not installed in the standard directory
+    fprintf(2,'Python 3.4.4 was not found in the standard directory.');
+    pythonRoot = uigetdir('', 'Select Python 3.4.4 "Lib" directory.');
+else
+    pythonRoot = fullfile('C:\Python34\Lib');
+end
+
 toolboxContent = 'URToolboxSupport';
 if ~isdir(toolboxContent)
     error(sprintf(...
@@ -250,10 +257,24 @@ fprintf('[Complete]\n');
 %% Install Python Modules
 % TODO - error check!
 fprintf('Installing necessary Python modules...');
-installModule = py.importlib.import_module('URModulesInstall');
-installModule.installURModules();
-fprintf('[Complete]\n');
-
+try
+    installModule = py.importlib.import_module('URModulesInstall');
+    installModule.installURModules();
+    fprintf('[Complete]\n');
+catch
+    fprintf('[Failed]\n')
+    fprintf(2,'Failed to install necessary Python modules. To install manually:\n')
+    fprintf(2,'\t - Open the Command Prompt,\n');
+    fprintf(2,'\t - Switch to the Python 3.4 Scripts directory\n');
+    fprintf(2,'\t\t run "cd C:\\Python34\\Scripts"\n');
+    fprintf(2,'\t - Install the math3D module\n');
+    fprintf(2,'\t\t run "pip install math3d"\n');
+    fprintf(2,'\t - Install the numpy module\n');
+    fprintf(2,'\t\t run "pip install numpy"\n');
+    fprintf(2,'\t - Install the urx module\n');
+    fprintf(2,'\t\t run "pip install urx"\n');
+end
+    
 end
 
 function ToolboxUpdate(toolboxName)
