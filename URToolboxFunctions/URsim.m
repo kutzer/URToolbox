@@ -217,11 +217,13 @@ classdef URsim < matlab.mixin.SetGet % Handle
                 end
             end
             
-            kids = get(obj.Figure,'Children');
-            if numel(kids) > 0
-                % TODO - consider prompting user to delete figure
-            else
-                delete(obj.Figure);
+            if ishandle(obj.Figure)
+                kids = get(obj.Figure,'Children');
+                if numel(kids) > 0
+                    % TODO - consider prompting user to delete figure
+                else
+                    delete(obj.Figure);
+                end
             end
         end
     end % end methods
