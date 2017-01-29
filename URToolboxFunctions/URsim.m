@@ -193,16 +193,28 @@ classdef URsim < matlab.mixin.SetGet % Handle
         
         function delete(obj)
             % Object destructor
-            if ~ishandle(obj.Axes) || ~ishandle(obj.Figure)
-                % TODO - correct destructor
-                return
+            if ishandle(obj.Frame0)
+                delete(obj.Frame0) % Delete UR simulation
             end
-            kids = get(obj.Axes,'Children');
-            if numel(kids) > 1
-                delete(obj.hFrame0);
-                % TODO - consider prompting user to delete axes
-            else
-                delete(obj.Axes);
+            
+            if ishandle(obj.Axes)
+                kids = get(obj.Axes,'Children');
+                axsPrompt = false;
+                if numel(kids) == 1
+                    % Check if remaining object is a light
+                    switch lower(kids(1).Type)
+                        case 'light'
+                            delete(obj.Axes)
+                        otherwise
+                            axsPrompt = true;
+                    end
+                else
+                    axsPrompt = true;
+                end
+                
+                if axsPrompt
+                    % TODO - consider prompting user to delete axes
+                end
             end
             
             kids = get(obj.Figure,'Children');
