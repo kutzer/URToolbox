@@ -12,8 +12,23 @@ ToolboxUpdate('UR');
 updateModule = py.importlib.import_module('URModulesUpdate');
 
 fprintf('Updating Python modules...');
-updateModule.updateURModules();
-fprintf('[Complete]\n');
+try
+    updateModule.updateURModules();
+    fprintf('[Complete]\n');
+catch
+    % TODO - add appropriate update "run" info
+    fprintf('[Failed]\n')
+    fprintf(2,'Failed to update necessary Python modules. To install manually:\n')
+    fprintf(2,'\t - Open the Command Prompt,\n');
+    fprintf(2,'\t - Switch to the Python 3.4 Scripts directory\n');
+    fprintf(2,'\t\t run "cd C:\\Python34\\Scripts"\n');
+    fprintf(2,'\t - Install the math3D module\n');
+    fprintf(2,'\t\t run "pip install math3d"\n');
+    fprintf(2,'\t - Install the numpy module\n');
+    fprintf(2,'\t\t run "pip install numpy"\n');
+    fprintf(2,'\t - Install the urx module\n');
+    fprintf(2,'\t\t run "pip install urx"\n');
+end
 
 end
 
