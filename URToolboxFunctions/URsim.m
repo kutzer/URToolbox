@@ -193,8 +193,8 @@ classdef URsim < matlab.mixin.SetGet % Handle
         
         function delete(obj)
             % Object destructor
-            if ishandle(obj.Frame0)
-                delete(obj.Frame0) % Delete UR simulation
+            if ishandle(obj.hFrame0)
+                delete(obj.hFrame0) % Delete UR simulation
             end
             
             if ishandle(obj.Axes)
@@ -240,6 +240,8 @@ classdef URsim < matlab.mixin.SetGet % Handle
             % Initialize(obj,URmodel)
             %
             % Initialize(obj,URmodel,complexity)
+            
+            % TODO - add resolution
             
             % Check inputs
             % TODO - consider narginchk
@@ -468,6 +470,7 @@ classdef URsim < matlab.mixin.SetGet % Handle
         end
         
     end % end methods
+    
     % --------------------------------------------------------------------
     % Getters/Setters
     % --------------------------------------------------------------------
