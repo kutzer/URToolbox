@@ -19,11 +19,12 @@ function varargout = URToolboxVer
 %               check for not-tracked issue in plotRigidBody
 %   10Mar2016 - Updated error checking in plotRigidBody and example updates
 %   19Dec2016 - Added simulation and support components
+%   27Feb2017 - Added patch object handles to simulation properties
 
 A.Name = 'UR Toolbox';
-A.Version = '1.1.1';
+A.Version = '1.1.2';
 A.Release = '(R2016a)';
-A.Date = '28-Jan-2017';
+A.Date = '27-Feb-2017';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);

@@ -83,6 +83,15 @@ classdef URsim < matlab.mixin.SetGet % Handle
     %   hJoint6     - hgtransform object for Joint 6,
     %                 Rz(theta6) relative to Frame 5
     %
+    % -Patch Handles (hidden)
+    %   pLink0      - patch objects associated with the robot base
+    %   pLink1      - patch objects associated with link 1
+    %   pLink2      - patch objects associated with link 2
+    %   pLink3      - patch objects associated with link 3
+    %   pLink4      - patch objects associated with link 4
+    %   pLink5      - patch objects associated with link 5
+    %   pLink6      - patch objects associated with link 6
+    %
     % Example:
     %
     %       % Create, initialize, and visualize
@@ -174,6 +183,16 @@ classdef URsim < matlab.mixin.SetGet % Handle
         hJoint4     % hgtransform object for Joint 4
         hJoint5     % hgtransform object for Joint 5
         hJoint6     % hgtransform object for Joint 6
+    end % end properties
+    
+    properties(GetAccess='public', SetAccess='private', Hidden=true)
+        pLink0      % patch objects associated with the robot base
+        pLink1      % patch objects associated with link 1
+        pLink2      % patch objects associated with link 2
+        pLink3      % patch objects associated with link 3
+        pLink4      % patch objects associated with link 4
+        pLink5      % patch objects associated with link 5
+        pLink6      % patch objects associated with link 6
     end % end properties
     
     % --------------------------------------------------------------------
@@ -404,6 +423,7 @@ classdef URsim < matlab.mixin.SetGet % Handle
                         axs = get(fig,'Children');
                         body = get(axs,'Children');
                         set(body,'Parent',mom);
+                        eval( sprintf('obj.pLink%d(j) = body;',i-2) );
                         close(fig);
                     end
                 end
