@@ -95,6 +95,7 @@ qd_dot = [0,0,0,0,0,0]              # Initialize desired joint velocities
 
 # Initialize integral term for controller
 Int_Delta_q = [0,0,0,0,0,0]         # Initialize numeric integral error \int_{0}^{t}(q_{d}(t) - q(t))
+Old_Delta_q = [0,0,0,0,0,0]         # Initialize old joint error
 
 # Initialize timer parameters
 frame = 0       # Current frame
@@ -143,11 +144,15 @@ thread controlThread():
             # Apply controller
             i = 0   # Joint number
             while i < 6:
+                # Update error term
+                Delta_q[i] = qd[i]-q[i]
+
                 # Update integral term
                 # - Integral error using the actual time difference
-                Int_Delta_q[i] = Int_Delta_q[i] + (qd[i]-q[i]) * (New_t - Old_t)
+                Int_Delta_q[i] = Int_Delta_q[i] + (Delta_q[i]+Old_Delta_q[i])/2 * (New_t - Old_t)
                 # - Integral error using the assumed 125 Hz thread rate
-                #Int_Delta_q[i] = Int_Delta_q[i] + (qd[i]-q[i]) * dt
+                #Int_Delta_q[i] = Int_Delta_q[i] + (Delta_q[i]+Old_Delta_q[i])/2 * dt
+
                 # Calculate current velocity
                 q_dot[i] = Kp*(qd[i]-q[i]) + Ki*(Int_Delta_q[i]) + Kd*qd_dot[i]
                 i=i+1
@@ -167,6 +172,7 @@ thread controlThread():
             end
 
             Old_t = New_t   # Save old time
+            Old_Delta_q = Delta_q   # Save old joint error
         
         elif jmotionTrigger:
             ###############################################################
