@@ -418,13 +418,45 @@ classdef URsim < matlab.mixin.SetGet % Handle
                     for j = 1:numel(f{i-1})
                         filename = sprintf('%s_%s.fig',f{i-1}{j},complexity);
                         open( fullfile(folderName,filename) );
-                        fig = gcf;
-                        set(fig,'Visible','off');
-                        axs = get(fig,'Children');
-                        body = get(axs,'Children');
-                        set(body,'Parent',mom);
-                        eval( sprintf('obj.pLink%d(j) = body;',i-2) );
-                        close(fig);
+                        
+                        figname = sprintf('%s_%s',f{i-1}{j},complexity);
+                        fig = findobj('Parent',0,'Name',figname);
+                        if isempty(fig)
+                            % Use current figure if no figure is found
+                            warning('URsim:unknownFigureName',...
+                                'The figure name for "%s" does not appear to be "%s". Attempting to use current figure instead.',filename,figname);
+                            drawnow;
+                            fig = gcf;
+                        end
+                        if numel(fig) > 1
+                            % Multiple candidate figures found
+                            %  - Cycle through figures
+                            warning('URsim:multipleFigureName',...
+                                'Multiple instances of "%s" are currently open.',figname);
+                            figs = fig;
+                            for fig_idx = 1:numel(figs)
+                                fig = figs(fig_idx);
+                                try
+                                    set(fig,'Visible','off');
+                                    axs = get(fig,'Children');
+                                    body = get(axs,'Children');
+                                    set(body,'Parent',mom);
+                                    eval( sprintf('obj.pLink%d(j) = body;',i-2) );
+                                    close(fig);
+                                    break
+                                catch
+                                    close(fig);
+                                end
+                            end
+                        else
+                            % Single figure found
+                            set(fig,'Visible','off');
+                            axs = get(fig,'Children');
+                            body = get(axs,'Children');
+                            set(body,'Parent',mom);
+                            eval( sprintf('obj.pLink%d(j) = body;',i-2) );
+                            close(fig);
+                        end
                     end
                 end
                 
