@@ -95,6 +95,7 @@ qd_dot = [0,0,0,0,0,0]              # Initialize desired joint velocities
 
 # Initialize integral term for controller
 Int_Delta_q = [0,0,0,0,0,0]         # Initialize numeric integral error \int_{0}^{t}(q_{d}(t) - q(t))
+Delta_q = [0,0,0,0,0,0]             # Initialize joint error
 Old_Delta_q = [0,0,0,0,0,0]         # Initialize old joint error
 
 # Initialize timer parameters
@@ -171,9 +172,9 @@ thread controlThread():
                 jwaypointTrigger = False
             end
 
-            Old_t = New_t   # Save old time
+            Old_t = New_t           # Save old time
             Old_Delta_q = Delta_q   # Save old joint error
-        
+
         elif jmotionTrigger:
             ###############################################################
             # Define standard motion module
