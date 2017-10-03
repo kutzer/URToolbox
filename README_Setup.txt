@@ -35,8 +35,8 @@ System does not like using imported .urp files -> convert text to .script and al
 Network Settings
 
 IP Addresses:
- - UR10: 10.1.1.2
- - UR5: 10.1.1.4
+ - UR5: 10.1.1.2
+ - UR10: 10.1.1.4
  - Computer: 10.1.1.5
 
 Subnet Mask:  255.255.255.0
