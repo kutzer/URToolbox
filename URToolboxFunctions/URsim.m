@@ -1,5 +1,5 @@
 classdef URsim < matlab.mixin.SetGet % Handle
-    % URsim handle class for creating a designated UR 
+    % URsim handle class for creating a designated UR
     % simulation/visualization
     %
     %   obj = URsim creates a simulation object for a specific UR
@@ -8,7 +8,7 @@ classdef URsim < matlab.mixin.SetGet % Handle
     %   Initialize  - Initialize the URsim object.
     %   Home        - Move URsim to home joint configuration.
     %   Stow        - Move URsim to stow joint configuration.
-    %   Zero        - Move URsim to zero joint configuration. 
+    %   Zero        - Move URsim to zero joint configuration.
     %   Undo        - Return URsim to previous joint configuration.
     %   get         - Query properties of the URsim object.
     %   set         - Update properties of the URsim object.
@@ -36,7 +36,7 @@ classdef URsim < matlab.mixin.SetGet % Handle
     %   Joint6      - scalar value containing joint 6 (radians)
     %
     % -End-effector pose
-    %   Pose        - 4x4 rigid body transform defining the end-effector 
+    %   Pose        - 4x4 rigid body transform defining the end-effector
     %                 pose relative to the world frame (linear units are
     %                 defined in millimeters)
     %
@@ -99,13 +99,13 @@ classdef URsim < matlab.mixin.SetGet % Handle
     %       ur5.Initialize('UR5');  % Designate as UR5 simulation
     %
     %       % Send simulation to zero configuration
-    %       ur5.Zero;               
+    %       ur5.Zero;
     %       pause(1);
     %       % Send simulation to hold configuration
     %       ur5.Home;
     %       pause(1);
     %       % Send simulation to random configuration
-    %       ur5.Joints = 2*pi*rand(1,6); 
+    %       ur5.Joints = 2*pi*rand(1,6);
     %       pause(1);
     %
     % See also
@@ -484,13 +484,13 @@ classdef URsim < matlab.mixin.SetGet % Handle
     methods(Access='public')
         function Home(obj)
             % Move the UR simulation to the home configuration
-            % TODO - confirm home position of UR3 and UR5 
+            % TODO - confirm home position of UR3 and UR5
             joints = [ 0.00;...
-                      -pi/2;...
-                       0.00;...
-                      -pi/2;...
-                       0.00;...
-                       0.00];
+                -pi/2;...
+                0.00;...
+                -pi/2;...
+                0.00;...
+                0.00];
             obj.Joints = joints;
         end
         
@@ -498,11 +498,11 @@ classdef URsim < matlab.mixin.SetGet % Handle
             % Move the UR simulation to the stow configuration
             % TODO - confirm stow position of UR3 and UR5
             joints = [ 0.00000;...
-                      -0.01626;...
-                      -2.77643;...
-                       1.22148;...
-                       1.57080;...
-                       0.00000];
+                -0.01626;...
+                -2.77643;...
+                1.22148;...
+                1.57080;...
+                0.00000];
             obj.Joints = joints;
         end
         
@@ -693,7 +693,46 @@ classdef URsim < matlab.mixin.SetGet % Handle
                 % Find solution closest to current configuration
                 q = obj.Joints;                 % Get current joint configuration
                 [q_star,q_sort] = findClosestVector(q_all,q);
+                
+                %{
                 % TODO - notify user is multiple options are close
+                % Prompt user to select from multiple options
+                if max( abs(q-q_star) ) < deg2rad(2)
+                    q_idx = 1;
+                    q_max = size(q_sort,2);
+                    while true
+                        % TODO - Make internal dialog to take care of this.
+                        choice = questdlg('Select viable solution', ...
+                            'Large Movement Solution', ...
+                            'Previous','Select','Next','Select');
+                        switch choice
+                            case 'Previous'
+                                q_idx = mod(q_idx - 1, q_max);
+                                if q_idx == 0
+                                    q_idx = q_max;
+                                end
+                                obj.Joints = q_sort(:,q_idx);
+                                drawnow
+                            case 'Next'
+                                q_idx = mod(q_idx + 1, q_max);
+                                if q_idx == 0
+                                    q_idx = q_max;
+                                end
+                                obj.Joints = q_sort(:,q_idx);
+                                drawnow
+                            case 'Select'
+                                q_star = q_sort(:,q_idx);
+                                break
+                            otherwise
+                                disp(choice);
+                                error('Unexpected response.');
+                        end
+                        
+                    end
+                    
+                end
+                %}
+                
                 obj.Joints = q_star;            % Set new joint configuration
                 obj.Pose = pose;                % Update pose
             else
@@ -753,7 +792,7 @@ classdef URsim < matlab.mixin.SetGet % Handle
             end
             obj.Joints_Old = allJoints;
         end
-            
+        
         % GetAccess ------------------------------------------------------
         
         % URmodel - Specified type of Universal Robot Manipulator

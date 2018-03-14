@@ -10,7 +10,7 @@ function varargout = URToolboxVer
 %             A.Release   : toolbox release string
 %             A.Date      : toolbox release date
 %
-%   M. Kutzer 17Feb2016, USNA
+%   M. Kutzer, 17Feb2016, USNA
 
 % Updates
 %   10Mar2016 - Updates to plotRigidBody documentation and visualization
@@ -21,6 +21,7 @@ function varargout = URToolboxVer
 %   19Dec2016 - Added simulation and support components
 %   27Feb2017 - Added patch object handles to simulation properties
 %   29Mar2017 - Updated UR_DHtable to match values from UR site
+%   14Mar2018 - Added waitformove function and example
 
 A.Name = 'UR Toolbox';
 A.Version = '1.1.3';
