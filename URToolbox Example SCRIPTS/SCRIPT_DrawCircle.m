@@ -7,13 +7,12 @@
 %
 %   M. Kutzer, 14Mar2018, USNA
 
-clearvars -EXCEPT simObj hwObj
+clearvars -EXCEPT hwObj
 close all
 clc
 
 %% Create hardware flag (for debugging)
 % -> Set value to true if you are connected to hardware
-
 useHardware = false;
 
 %% Initialize simulation
@@ -101,7 +100,7 @@ if useHardware
     % assuming a desired velocity of zero for all joints at each waypoint.
     msg(hwObj,sprintf('(%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f,%f)',q,zeros(6,1)));
     % Wait for the robot to finish executing the move
-    urWaitForMove(hwObj);
+    UR_WaitForMove(hwObj);
 end
 % Allow plot to update
 drawnow
@@ -124,7 +123,7 @@ for i = 1:numel(s)
         % Wait for move only on the first waypoint
         if i == 1
             % Wait for the robot to finish executing the move
-            urWaitForMove(hwObj);
+            UR_WaitForMove(hwObj);
         end
     end
     
