@@ -22,11 +22,14 @@ function varargout = URToolboxVer
 %   27Feb2017 - Added patch object handles to simulation properties
 %   29Mar2017 - Updated UR_DHtable to match values from UR site
 %   14Mar2018 - Added waitformove function and example
+%   15Mar2018 - Updated to include try/catch for required toolbox
+%               installations and include msgbox warning when download 
+%               fails.
 
 A.Name = 'UR Toolbox';
-A.Version = '1.1.3';
+A.Version = '1.1.4';
 A.Release = '(R2016a)';
-A.Date = '29-Mar-2017';
+A.Date = '15-Mar-2018';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);

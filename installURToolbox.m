@@ -16,7 +16,10 @@ function installURToolbox(replaceExisting)
 
 % Updates
 %   19Dec2016 - Added genpath to include all simulation components in the
-%   path.
+%               path.
+%   15Mar2018 - Updated to include try/catch for required toolbox
+%               installations and include msgbox warning when download 
+%               fails.
 
 % TODO - Allow users to create a local version if admin rights are not
 % possible.
@@ -297,23 +300,50 @@ tmpFolder = sprintf('%sToolbox',toolboxName);
 pname = fullfile(tempdir,tmpFolder);
 
 %% Download and unzip toolbox (GitHub)
-if (strcmp(toolboxName,'Transformation')) || (strcmp(toolboxName,'Plotting'))
-    url = sprintf('https://github.com/kutzer/%sToolbox/archive/master.zip',toolboxName);
-else
-    url = sprintf('https://github.com/kutzer/%sToolbox/archive/master.zip',toolboxName);
-end
-
+url = sprintf('https://github.com/kutzer/%sToolbox/archive/master.zip',toolboxName);
 try
+    % Original download/unzip method using "unzip"
     fnames = unzip(url,pname);
+    
     fprintf('SUCCESS\n');
     confirm = true;
 catch
-    confirm = false;
+    try
+        % Alternative download method using "urlwrite"
+        % - This method is flagged as not recommended in the MATLAB
+        % documentation.
+        % TODO - Consider an alternative to urlwrite.
+        tmpFname = sprintf('%sToolbox-master.zip',toolboxName);
+        urlwrite(url,fullfile(pname,tmpFname));
+        fnames = unzip(fullfile(pname,tmpFname),pname);
+        delete(fullfile(pname,tmpFname));
+        
+        fprintf('SUCCESS\n');
+        confirm = true;
+    catch
+        fprintf('FAILED\n');
+        confirm = false;
+    end
 end
 
 %% Check for successful download
+alternativeInstallMsg = [...
+    sprintf('Manually download the %s Toolbox using the following link:\n',toolboxName),...
+    sprintf('\n'),...
+    sprintf('%s\n',url),...
+    sprintf('\n'),...
+    sprintf('Once the file is downloaded:\n'),...
+    sprintf('\t(1) Unzip your download of the "%sToolbox"\n',toolboxName),...
+    sprintf('\t(2) Change your "working directory" to the location of "install%sToolbox.m"\n',toolboxName),...
+    sprintf('\t(3) Enter "install%sToolbox" (without quotes) into the command window\n',toolboxName),...
+    sprintf('\t(4) Press Enter.')];
+        
 if ~confirm
-    error('InstallToolbox:FailedDownload','Failed to download updated version of %s Toolbox.',toolboxName);
+    warning('InstallToolbox:FailedDownload','Failed to download updated version of %s Toolbox.',toolboxName);
+    fprintf(2,'\n%s\n',alternativeInstallMsg);
+    
+    msgbox(alternativeInstallMsg, sprintf('Failed to download %s Toolbox',toolboxName),'warn');
+    return
 end
 
 %% Find base directory
