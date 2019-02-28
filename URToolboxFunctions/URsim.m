@@ -295,7 +295,33 @@ classdef URsim < matlab.mixin.SetGet % Handle
             % Check UR Model
             switch upper(obj.URmodel)
                 case 'UR3'
-                    error('URsim:noUR3','DH Parameters for the UR3 have yet to be specified.');
+                    % UR3
+                    % Define visualization forward kinematics
+                    obj.Frame0 = eye(4);                                        % H^w_0
+                    obj.Frame1 = Tx(   0.00)*Ty(   0.00)*Tz(  86.05);           % H^0_1
+                    obj.Frame2 = Tx(   0.00)*Ty( -54.00)*Tz(  65.85)*Rx( pi/2); % H^1_2
+                    obj.Frame3 = Tx(-243.65)*Ty(  -0.04)*Tz(  23.60);           % H^2_3
+                    obj.Frame4 = Tx(-212.70)*Ty(   0.00)*Tz(  -8.00);           % H^3_4
+                    obj.Frame5 = Tx(   0.00)*Ty( -42.60)*Tz(  40.80)*Rx( pi/2); % H^4_5
+                    obj.Frame6 = Tx(   0.00)*Ty(  42.60)*Tz(  40.80)*Rx(-pi/2); % H^5_6
+                    obj.FrameE = Tx(   0.00)*Ty(   0.00)*Tz(  39.80);           % H^6_e
+                    obj.FrameT = eye(4);                                        % H^e_t
+                    
+                    % Define files
+                    folderName = 'SimulationComponents, UR3';
+                    f{1,1} = {'UR3_Link0'};
+                    f{2,1} = {'UR3_Link1'};
+                    f{3,1} = {'UR3_Link2_P1','UR3_Link2_P2','UR3_Link2_P3'};
+                    f{4,1} = {'UR3_Link3_P1','UR3_Link3_P2','UR3_Link3_P3'};
+                    f{5,1} = {'UR3_Link4'};
+                    f{6,1} = {'UR3_Link5'};
+                    f{7,1} = {'UR3_Link6'};
+                    % Define plotting information
+                    Scale = 100;
+                    LineWidth = 3;
+                    xlimit = [-700,700];
+                    ylimit = [-700,700];
+                    zlimit = [ -150,700];
                 case 'UR5'
                     % UR5
                     % Define visualization forward kinematics
