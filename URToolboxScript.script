@@ -361,7 +361,7 @@ end
 ###########################################################################
 if controlHandle:
     textmsg("Killing control thread.")
-    join controlHandle  # Allow thre thread to finish
+    join controlHandle  # Allow the thread to finish
     kill controlHandle  # Kill the thread (this is redundant)
 end
 
