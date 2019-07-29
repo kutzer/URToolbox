@@ -19,7 +19,7 @@
 #   qdot = Kp(qd-q) + Ki*integral(qd-q)dt + Kd*qd_dot
 #
 # Basic Controller Equation (LaTeX):
-#   \dot{q} = K_p (q_{d}(t) - q(t)) + K_i \int_{0}^{t}(q_{d}(t) - q(t)) + K_d \dot(q_{d}(t))dt
+#   \dot{q} = K_p (q_{d}(t) - q(t)) + K_i \int_{0}^{t}(q_{d}(t) - q(t)) + K_d \dot{q}_{d}(t)dt
 #
 # Valid Script Inputs:
 #   Joint Trajectory Waypoint Command (using PID controller)
