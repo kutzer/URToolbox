@@ -231,7 +231,12 @@ for i = 1:n
         end
     else
         fprintf('\t%s...',files(i).name);
-        [isCopy,msg,msgID] = copyfile(source,destination,'f');
+        if all( destination == 0 )
+            % Ignore cancelled operation...
+            isCopy = false;
+        else
+            [isCopy,msg,msgID] = copyfile(source,destination,'f');
+        end
         
         if isCopy == 1
             fprintf('[Complete]\n');
