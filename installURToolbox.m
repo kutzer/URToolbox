@@ -1,15 +1,15 @@
 function installURToolbox(replaceExisting)
 % INSTALLURTOOLBOX installs UR Toolbox for MATLAB.
-%   INSTALLURTOOLBOX installs UR Toolbox into the following 
+%   INSTALLURTOOLBOX installs UR Toolbox into the following
 %   locations:
 %                        Source: Destination
 %     URToolboxFunctions: matlabroot\toolbox\ur
-%       URToolboxSupport: matlabroot\toolbox\ur\OptiTrackToolboxSupport 
+%       URToolboxSupport: matlabroot\toolbox\ur\OptiTrackToolboxSupport
 %
 %   INSTALLURTOOLBOX(true) installs UR Toolbox regardless of
 %   whether a copy of the UR toolbox exists in the MATLAB root.
 %
-%   INSTALLURTOOLBOX(false) installs UR Toolbox only if no copy 
+%   INSTALLURTOOLBOX(false) installs UR Toolbox only if no copy
 %   of the UR toolbox exists in the MATLAB root.
 %
 %   M. Kutzer 17Feb2016, USNA
@@ -18,9 +18,10 @@ function installURToolbox(replaceExisting)
 %   19Dec2016 - Added genpath to include all simulation components in the
 %               path.
 %   15Mar2018 - Updated to include try/catch for required toolbox
-%               installations and include msgbox warning when download 
+%               installations and include msgbox warning when download
 %               fails.
 %   08Jan2021 - Updated ToolboxUpdate
+%   08Jan2021 - Updated action cancelled when python is not installed
 
 % TODO - Allow users to create a local version if admin rights are not
 % possible.
@@ -40,11 +41,11 @@ end
 %% Installation error solution(s)
 adminSolution = sprintf(...
     ['Possible solution:\n',...
-     '\t(1) Close current instance of MATLAB\n',...
-     '\t(2) Open a new instance of MATLAB "as administrator"\n',...
-     '\t\t(a) Locate MATLAB shortcut\n',...
-     '\t\t(b) Right click\n',...
-     '\t\t(c) Select "Run as administrator"\n']);
+    '\t(1) Close current instance of MATLAB\n',...
+    '\t(2) Open a new instance of MATLAB "as administrator"\n',...
+    '\t\t(a) Locate MATLAB shortcut\n',...
+    '\t\t(b) Right click\n',...
+    '\t\t(c) Select "Run as administrator"\n']);
 
 %% Check for toolbox directory
 toolboxRoot  = fullfile(matlabroot,'toolbox',dirName);
@@ -55,7 +56,7 @@ if isToolbox == 7
         choice = questdlg(sprintf(...
             ['MATLAB Root already contains the UR Toolbox.\n',...
             'Would you like to replace the existing toolbox?']),...
-            'Yes','No');
+            'Replace Existing Universal Robot Toolbox','Yes','No','Cancel','Yes');
     elseif replaceExisting
         choice = 'Yes';
     else
@@ -65,7 +66,9 @@ if isToolbox == 7
     switch choice
         case 'Yes'
             rmpath(toolboxRoot);
+            warning off
             [isRemoved, msg, msgID] = rmdir(toolboxRoot,'s');
+            warning on
             if isRemoved
                 fprintf('Previous version of UR Toolbox removed successfully.\n');
             else
@@ -99,16 +102,16 @@ toolboxContent = 'URToolboxFunctions';
 if ~isdir(toolboxContent)
     error(sprintf(...
         ['Change your working directory to the location of "installURToolbox.m".\n',...
-         '\n',...
-         'If this problem persists:\n',...
-         '\t(1) Unzip your original download of "URToolbox" into a new directory\n',...
-         '\t(2) Open a new instance of MATLAB "as administrator"\n',...
-         '\t\t(a) Locate MATLAB shortcut\n',...
-         '\t\t(b) Right click\n',...
-         '\t\t(c) Select "Run as administrator"\n',...
-         '\t(3) Change your "working directory" to the location of "installURToolbox.m"\n',...
-         '\t(4) Enter "installURToolbox" (without quotes) into the command window\n',...
-         '\t(5) Press Enter.']));
+        '\n',...
+        'If this problem persists:\n',...
+        '\t(1) Unzip your original download of "URToolbox" into a new directory\n',...
+        '\t(2) Open a new instance of MATLAB "as administrator"\n',...
+        '\t\t(a) Locate MATLAB shortcut\n',...
+        '\t\t(b) Right click\n',...
+        '\t\t(c) Select "Run as administrator"\n',...
+        '\t(3) Change your "working directory" to the location of "installURToolbox.m"\n',...
+        '\t(4) Enter "installURToolbox" (without quotes) into the command window\n',...
+        '\t(5) Press Enter.']));
 end
 files = dir(toolboxContent);
 wb = waitbar(0,'Copying UR Toolbox toolbox contents...');
@@ -171,7 +174,7 @@ set(wb,'Visible','off');
 % one...
 if exist('C:\Python34\Lib','dir') ~= 7
     % Python 3.4 is not installed in the standard directory
-    fprintf(2,'Python 3.4.4 was not found in the standard directory.');
+    fprintf(2,'Python 3.4.4 was not found in the standard directory.\n');
     pythonRoot = uigetdir('', 'Select Python 3.4.4 "Lib" directory.');
 else
     pythonRoot = fullfile('C:\Python34\Lib');
@@ -181,40 +184,56 @@ toolboxContent = 'URToolboxSupport';
 if ~isdir(toolboxContent)
     error(sprintf(...
         ['Change your working directory to the location of "installURToolbox.m".\n',...
-         '\n',...
-         'If this problem persists:\n',...
-         '\t(1) Unzip your original download of "URToolbox" into a new directory\n',...
-         '\t(2) Open a new instance of MATLAB "as administrator"\n',...
-         '\t\t(a) Locate MATLAB shortcut\n',...
-         '\t\t(b) Right click\n',...
-         '\t\t(c) Select "Run as administrator"\n',...
-         '\t(3) Change your "working directory" to the location of "installURToolbox.m"\n',...
-         '\t(4) Enter "installURToolbox" (without quotes) into the command window\n',...
-         '\t(5) Press Enter.']));
+        '\n',...
+        'If this problem persists:\n',...
+        '\t(1) Unzip your original download of "URToolbox" into a new directory\n',...
+        '\t(2) Open a new instance of MATLAB "as administrator"\n',...
+        '\t\t(a) Locate MATLAB shortcut\n',...
+        '\t\t(b) Right click\n',...
+        '\t\t(c) Select "Run as administrator"\n',...
+        '\t(3) Change your "working directory" to the location of "installURToolbox.m"\n',...
+        '\t(4) Enter "installURToolbox" (without quotes) into the command window\n',...
+        '\t(5) Press Enter.']));
 end
 files = dir(toolboxContent);
-wb = waitbar(0,'Copying UR Toolbox toolbox contents...');
-n = numel(files);
-fprintf('Copying UR Toolbox contents:\n');
-for i = 1:n
-    % source file location
-    source = fullfile(toolboxContent,files(i).name);
-    % destination location
-    destination = pythonRoot;
-    if files(i).isdir
-        switch files(i).name
-            case '.'
-                %Ignore
-            case '..'
-                %Ignore
-            otherwise
-                fprintf('\t%s...',files(i).name);
-                nDestination = fullfile(destination,files(i).name);
-                [isDir,msg,msgID] = mkdir(nDestination);
-                if isDir
-                    [isCopy,msg,msgID] = copyfile(source,nDestination,'f');
-                    if isCopy
-                        fprintf('[Complete]\n');
+
+if numel(pythonRoot) == 1 && pythonRoot == 0
+    fprintf(2,' -> ACTION CANCELLED\n');
+    fprintf(2,['',...
+        '\tNOTE: All simulation and kinematic functions should be fully\n',...
+        '\tinstalled. You will not be able to interact with UR hardware\n',...
+        '\tuntil Python 3.4.4 is successfully installed. Please install\n',...
+        '\tPython and run installURToolbox again.\n']);
+else
+    wb = waitbar(0,'Copying UR Toolbox toolbox contents...');
+    n = numel(files);
+    fprintf('Copying UR Toolbox contents:\n');
+    for i = 1:n
+        % source file location
+        source = fullfile(toolboxContent,files(i).name);
+        % destination location
+        destination = pythonRoot;
+        if files(i).isdir
+            switch files(i).name
+                case '.'
+                    %Ignore
+                case '..'
+                    %Ignore
+                otherwise
+                    fprintf('\t%s...',files(i).name);
+                    nDestination = fullfile(destination,files(i).name);
+                    [isDir,msg,msgID] = mkdir(nDestination);
+                    if isDir
+                        [isCopy,msg,msgID] = copyfile(source,nDestination,'f');
+                        if isCopy
+                            fprintf('[Complete]\n');
+                        else
+                            bin = msg == char(10);
+                            msg(bin) = [];
+                            bin = msg == char(13);
+                            msg(bin) = [];
+                            fprintf('[Failed: "%s"]\n',msg);
+                        end
                     else
                         bin = msg == char(10);
                         msg(bin) = [];
@@ -222,36 +241,30 @@ for i = 1:n
                         msg(bin) = [];
                         fprintf('[Failed: "%s"]\n',msg);
                     end
-                else
-                    bin = msg == char(10);
-                    msg(bin) = [];
-                    bin = msg == char(13);
-                    msg(bin) = [];
-                    fprintf('[Failed: "%s"]\n',msg);
-                end
-        end
-    else
-        fprintf('\t%s...',files(i).name);
-        if all( destination == 0 )
-            % Ignore cancelled operation...
-            isCopy = false;
+            end
         else
-            [isCopy,msg,msgID] = copyfile(source,destination,'f');
+            fprintf('\t%s...',files(i).name);
+            if all( destination == 0 )
+                % Ignore cancelled operation...
+                isCopy = false;
+            else
+                [isCopy,msg,msgID] = copyfile(source,destination,'f');
+            end
+            
+            if isCopy == 1
+                fprintf('[Complete]\n');
+            else
+                bin = msg == char(10);
+                msg(bin) = [];
+                bin = msg == char(13);
+                msg(bin) = [];
+                fprintf('[Failed: "%s"]\n',msg);
+            end
         end
-        
-        if isCopy == 1
-            fprintf('[Complete]\n');
-        else
-            bin = msg == char(10);
-            msg(bin) = [];
-            bin = msg == char(13);
-            msg(bin) = [];
-            fprintf('[Failed: "%s"]\n',msg);
-        end
+        waitbar(i/n,wb);
     end
-    waitbar(i/n,wb);
+    set(wb,'Visible','off');
 end
-set(wb,'Visible','off');
 
 %% Save toolbox path
 addpath(genpath(toolboxRoot),'-end');
@@ -265,25 +278,30 @@ fprintf('[Complete]\n');
 
 %% Install Python Modules
 % TODO - error check!
-fprintf('Installing necessary Python modules...');
-try
-    installModule = py.importlib.import_module('URModulesInstall');
-    installModule.installURModules();
-    fprintf('[Complete]\n');
-catch
-    fprintf('[Failed]\n')
-    fprintf(2,'Failed to install necessary Python modules. To install manually:\n')
-    fprintf(2,'\t - Open the Command Prompt,\n');
-    fprintf(2,'\t - Switch to the Python 3.4 Scripts directory\n');
-    fprintf(2,'\t\t run "cd C:\\Python34\\Scripts"\n');
-    fprintf(2,'\t - Install the math3D module\n');
-    fprintf(2,'\t\t run "pip install math3d"\n');
-    fprintf(2,'\t - Install the numpy module\n');
-    fprintf(2,'\t\t run "pip install numpy"\n');
-    fprintf(2,'\t - Install the urx module\n');
-    fprintf(2,'\t\t run "pip install urx"\n');
+if numel(pythonRoot) == 1 && pythonRoot == 0
+    % ACTION CANCELLED
+else
+    fprintf('Installing necessary Python modules...');
+    try
+        installModule = py.importlib.import_module('URModulesInstall');
+        installModule.installURModules();
+        fprintf('[Complete]\n');
+    catch ME
+        fprintf('[Failed]\n')
+        fprintf(2,'ERROR MESSAGE:\n\t%s\n\n',ME.message);
+        fprintf(2,'Failed to install necessary Python modules. To install manually:\n')
+        fprintf(2,'\t - Open the Command Prompt,\n');
+        fprintf(2,'\t - Switch to the Python 3.4 Scripts directory\n');
+        fprintf(2,'\t\t run "cd C:\\Python34\\Scripts"\n');
+        fprintf(2,'\t - Install the math3D module\n');
+        fprintf(2,'\t\t run "pip install math3d"\n');
+        fprintf(2,'\t - Install the numpy module\n');
+        fprintf(2,'\t\t run "pip install numpy"\n');
+        fprintf(2,'\t - Install the urx module\n');
+        fprintf(2,'\t\t run "pip install urx"\n');
+    end
 end
-    
+
 end
 
 function ToolboxUpdate(toolboxName)
@@ -340,11 +358,11 @@ alternativeInstallMsg = [...
     sprintf('\t(2) Change your "working directory" to the location of "install%sToolbox.m"\n',toolboxName),...
     sprintf('\t(3) Enter "install%sToolbox" (without quotes) into the command window\n',toolboxName),...
     sprintf('\t(4) Press Enter.')];
-        
+
 if ~confirm
     warning('InstallToolbox:FailedDownload','Failed to download updated version of %s Toolbox.',toolboxName);
     fprintf(2,'\n%s\n',alternativeInstallMsg);
-	
+    
     msgbox(alternativeInstallMsg, sprintf('Failed to download %s Toolbox',toolboxName),'warn');
     return
 end
