@@ -26,9 +26,9 @@ function installURToolbox(replaceExisting)
 % TODO - Allow users to create a local version if admin rights are not
 % possible.
 
-%% Install/Update required toolboxes
-ToolboxUpdate('Transformation');
-ToolboxUpdate('Plotting');
+%% Define support toolboxes
+supportToolboxes = {...
+    'URSimulation'};
 
 %% Assign tool/toolbox specific parameters
 dirName = 'ur';
@@ -302,8 +302,17 @@ else
     end
 end
 
+%% Install/Update required toolboxes
+for i = 1:numel(supportToolboxes)
+    ToolboxUpdate( supportToolboxes{i} );
+end
+    
 end
 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% TOOLBOX UPDATE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% 26Mar2021
 function ToolboxUpdate(toolboxName)
 
 %% Setup functions
@@ -319,7 +328,8 @@ catch ME
 end
 
 %% Setup temporary file directory
-fprintf('Downloading the %s Toolbox...',toolboxName);
+% TODO - check "ok"
+fprintf('Creating %s Toolbox temporary directory...',toolboxName);
 tmpFolder = sprintf('%sToolbox',toolboxName);
 pname = fullfile(tempdir,tmpFolder);
 if isfolder(pname)
@@ -328,9 +338,32 @@ if isfolder(pname)
 end
 % Create new directory
 [ok,msg] = mkdir(tempdir,tmpFolder);
+fprintf('SUCCESS\n');
 
 %% Download and unzip toolbox (GitHub)
-url = sprintf('https://github.com/kutzer/%sToolbox/archive/master.zip',toolboxName);
+%url = sprintf('https://github.com/kutzer/%sToolbox/archive/master.zip',toolboxName); <--- Github removed references to "master"
+%url = sprintf('https://github.com/kutzer/%sToolbox/archive/refs/heads/main.zip',toolboxName);
+
+% Check possible branches
+defBranches = {'master','main'};
+for i = 1:numel(defBranches)
+    % Check default branch
+    defBranch = defBranches{i};
+    url = sprintf('https://github.com/kutzer/%sToolbox/archive/refs/heads/%s.zip',...
+        toolboxName,defBranch);
+    % Check url
+    [~,status] = urlread(url);
+    fprintf('Checking for branch "%s"...',defBranch);
+    if status
+        fprintf('FOUND\n');
+        break
+    else
+        fprintf('INVALID\n');
+    end
+end
+
+% Download and unzip repository
+fprintf('Downloading the %s Toolbox...',toolboxName);
 try
     %fnames = unzip(url,pname);
     %urlwrite(url,fullfile(pname,tmpFname));
@@ -392,3 +425,6 @@ end
 fprintf('Installation complete.\n');
 
 end
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% END TOOLBOX UPDATE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

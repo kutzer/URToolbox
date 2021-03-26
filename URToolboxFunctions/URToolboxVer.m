@@ -26,11 +26,12 @@ function varargout = URToolboxVer
 %               installations and include msgbox warning when download 
 %               fails.
 %   08Jan2021 - Updated ToolboxUpdate
+%   26Mar2021 - Migrated simulation tools to a different repository
 
 A.Name = 'UR Toolbox';
-A.Version = '1.1.5';
+A.Version = '1.1.6';
 A.Release = '(R2019b)';
-A.Date = '08-Jan-2021';
+A.Date = '26-Mar-2021';
 A.URLVer = 1;
 
 msg{1} = sprintf('MATLAB %s Version: %s %s',A.Name, A.Version, A.Release);
